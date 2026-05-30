@@ -3,8 +3,7 @@ package io.github.aaryadev.justsingle.client.emulation;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class ClickTimingModel {
-    private static final double BASE_PROBABILITY = 0.26D;
-    private static final double GUI_PROBABILITY = 0.22D;
+    private static final double LEFT_CLICK_PROBABILITY = 0.35D;
 
     private static final long MIN_DUPLICATE_COOLDOWN_NS = 14_000_000L;
     private static final long MAX_DUPLICATE_COOLDOWN_NS = 38_000_000L;
@@ -15,7 +14,7 @@ public final class ClickTimingModel {
     private static final long MIN_BOUNCE_GAP_NS = 120_000L;
     private static final long MAX_BOUNCE_GAP_NS = 680_000L;
 
-    public boolean shouldDuplicate(boolean inScreen, long nowNanos, long lastDuplicateNanos, long lastNativePressNanos) {
+    public boolean shouldDuplicate(int button, long nowNanos, long lastDuplicateNanos, long lastNativePressNanos) {
         if (lastNativePressNanos != 0L && nowNanos - lastNativePressNanos < MIN_NATIVE_PRESS_SPACING_NS) {
             return false;
         }
@@ -27,7 +26,11 @@ public final class ClickTimingModel {
             }
         }
 
-        double probability = inScreen ? GUI_PROBABILITY : BASE_PROBABILITY;
+        if (button == 1) {
+            return true;
+        }
+
+        double probability = LEFT_CLICK_PROBABILITY;
         return ThreadLocalRandom.current().nextDouble() < probability;
     }
 

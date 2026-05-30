@@ -28,7 +28,7 @@ public final class DoubleClickEmulator {
         long lastNativePressNanos = stateTracker.getLastNativePressNanos(button);
         long lastDuplicateNanos = stateTracker.getLastDuplicateNanos(button);
 
-        if (!timingModel.shouldDuplicate(inScreen, nowNanos, lastDuplicateNanos, lastNativePressNanos)) {
+        if (!timingModel.shouldDuplicate(button, nowNanos, lastDuplicateNanos, lastNativePressNanos)) {
             return;
         }
 
