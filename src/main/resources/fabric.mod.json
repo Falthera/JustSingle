@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "justsingle",
+  "version": "${version}",
+  "name": "JustSingle",
+  "description": "Client-side authentic hardware-style mouse double-click emulation that is always on.",
+  "authors": [
+    "Falthera"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/justsingle/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "main": [
+      "io.github.aaryadev.justsingle.JustSingleMod"
+    ],
+    "client": [
+      "io.github.aaryadev.justsingle.client.JustSingleClient"
+    ]
+  },
+  "mixins": [
+    "justsingle.client.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.2",
+    "minecraft": "1.21.11",
+    "fabric-api": "*",
+    "java": ">=21"
+  }
+}
