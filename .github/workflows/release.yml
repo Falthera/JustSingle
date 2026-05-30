@@ -1,11 +1,14 @@
 name: Build Tag Release
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       release_tag:
         description: "Release tag to create and publish (example: v1.0.0)"
-        required: true
+        required: false
         type: string
       prerelease:
         description: "Mark this release as prerelease"
@@ -35,12 +38,34 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v3
 
+      - name: Resolve release metadata
+        id: meta
+        shell: bash
+        run: |
+          MOD_VERSION="$(grep '^mod_version=' gradle.properties | cut -d'=' -f2)"
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.release_tag }}" ]; then
+            TAG="${{ inputs.release_tag }}"
+          else
+            TAG="v${MOD_VERSION}+build.${GITHUB_RUN_NUMBER}"
+          fi
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.prerelease }}" = "true" ]; then
+            PRERELEASE="true"
+          else
+            PRERELEASE="false"
+          fi
+
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "prerelease=${PRERELEASE}" >> "$GITHUB_OUTPUT"
+          echo "name=JustSingle ${TAG}" >> "$GITHUB_OUTPUT"
+
       - name: Build mod
         run: gradle clean build --no-daemon
 
       - name: Create and push tag if missing
         env:
-          RELEASE_TAG: ${{ inputs.release_tag }}
+          RELEASE_TAG: ${{ steps.meta.outputs.tag }}
         run: |
           if git ls-remote --tags origin "refs/tags/${RELEASE_TAG}" | grep -q "${RELEASE_TAG}"; then
             echo "Tag ${RELEASE_TAG} already exists on origin"
@@ -55,9 +80,10 @@ jobs:
       - name: Create GitHub release and upload jars
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ inputs.release_tag }}
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: ${{ steps.meta.outputs.name }}
           generate_release_notes: true
-          prerelease: ${{ inputs.prerelease }}
+          prerelease: ${{ steps.meta.outputs.prerelease }}
           files: |
             build/libs/*.jar
           fail_on_unmatched_files: true

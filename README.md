@@ -52,20 +52,20 @@ This produces an additional click edge while preserving natural button state pro
 
 ## GitHub Auto Release
 
-This repository includes a one-click GitHub Actions release workflow at `.github/workflows/release.yml`.
+This repository includes an automated GitHub Actions release workflow at `.github/workflows/release.yml`.
 
-When triggered, it will:
+On every push to `main`, it will:
 
 1. Compile the mod jar.
-2. Create and push the requested git tag (if missing).
+2. Create and push an automatic git tag in the form `v<mod_version>+build.<run_number>`.
 3. Create a GitHub Release for that tag.
 4. Upload built jars from `build/libs` to the release.
 
-### How to run
+### Manual override (optional)
 
 1. Open Actions in GitHub.
 2. Run `Build Tag Release`.
-3. Enter a tag like `v1.0.0`.
+3. Optionally enter a custom tag like `v1.0.0`.
 4. Click `Run workflow`.
 
 ## Build Instructions
