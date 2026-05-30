@@ -56,10 +56,14 @@ This repository includes an automated GitHub Actions release workflow at `.githu
 
 On every push to `main`, it will:
 
-1. Compile the mod jar.
-2. Create and push an automatic git tag in the form `v<mod_version>+build.<run_number>`.
-3. Create a GitHub Release for that tag.
-4. Upload built jars from `build/libs` to the release.
+1. Increment `mod_version` in `gradle.properties` by patch version.
+2. Commit and push that bump automatically.
+3. Compile the mod jar.
+4. Create and push a git tag in the form `v<new_version>`.
+5. Create a GitHub Release for that tag.
+6. Upload built jars from `build/libs` to the release.
+
+Example: `1.0.0` becomes `1.0.1`, then the release tag is `v1.0.1`.
 
 ### Manual override (optional)
 

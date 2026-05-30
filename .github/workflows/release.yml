@@ -21,6 +21,7 @@ permissions:
 
 jobs:
   build-tag-release:
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip ci]') }}
     runs-on: ubuntu-latest
 
     steps:
@@ -38,27 +39,46 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Resolve release metadata
+      - name: Resolve release metadata and version
         id: meta
         shell: bash
         run: |
           MOD_VERSION="$(grep '^mod_version=' gradle.properties | cut -d'=' -f2)"
 
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.release_tag }}" ]; then
-            TAG="${{ inputs.release_tag }}"
-          else
-            TAG="v${MOD_VERSION}+build.${GITHUB_RUN_NUMBER}"
-          fi
+          if [ "${{ github.event_name }}" = "push" ]; then
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$MOD_VERSION"
+            NEXT_PATCH=$((PATCH + 1))
+            NEXT_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}"
 
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.prerelease }}" = "true" ]; then
-            PRERELEASE="true"
-          else
+            sed -i "s/^mod_version=.*/mod_version=${NEXT_VERSION}/" gradle.properties
+
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add gradle.properties
+            git commit -m "ci: bump mod_version to ${NEXT_VERSION} [skip ci]"
+            git push
+
+            TAG="v${NEXT_VERSION}"
             PRERELEASE="false"
+            RELEASE_NAME="JustSingle ${TAG}"
+          elif [ -n "${{ inputs.release_tag }}" ]; then
+            TAG="${{ inputs.release_tag }}"
+            RELEASE_NAME="JustSingle ${TAG}"
+
+            if [ "${{ inputs.prerelease }}" = "true" ]; then
+              PRERELEASE="true"
+            else
+              PRERELEASE="false"
+            fi
+          else
+            TAG="v${MOD_VERSION}"
+            PRERELEASE="false"
+            RELEASE_NAME="JustSingle ${TAG}"
           fi
 
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
           echo "prerelease=${PRERELEASE}" >> "$GITHUB_OUTPUT"
-          echo "name=JustSingle ${TAG}" >> "$GITHUB_OUTPUT"
+          echo "name=${RELEASE_NAME}" >> "$GITHUB_OUTPUT"
 
       - name: Build mod
         run: gradle clean build --no-daemon
