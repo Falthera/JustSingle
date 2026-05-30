@@ -5,6 +5,7 @@ import io.github.aaryadev.justsingle.client.emulation.DoubleClickEmulator;
 import io.github.aaryadev.justsingle.client.state.ButtonStateTracker;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
+import net.minecraft.client.input.MouseInput;
 import org.lwjgl.glfw.GLFW;
 
 public final class MouseInputInterceptor {
@@ -34,7 +35,7 @@ public final class MouseInputInterceptor {
         focusedLastTick = focusedNow;
     }
 
-    public void onMouseButton(Mouse mouse, MinecraftClient client, long window, int button, int action, int mods) {
+    public void onMouseButton(Mouse mouse, MinecraftClient client, long window, MouseInput input, int action) {
         if (emulator.isSyntheticDispatch()) {
             return;
         }
@@ -52,11 +53,12 @@ public final class MouseInputInterceptor {
             return;
         }
 
+        int button = input.button();
         long nowNanos = System.nanoTime();
         if (action == GLFW.GLFW_PRESS) {
             buttonStateTracker.onNativePress(button, nowNanos);
             boolean inScreen = client.currentScreen != null;
-            emulator.duplicateAsHardwareBounce(mouse, window, button, mods, nowNanos, inScreen);
+            emulator.duplicateAsHardwareBounce(mouse, window, input, nowNanos, inScreen);
             return;
         }
 

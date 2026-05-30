@@ -3,6 +3,7 @@ package io.github.aaryadev.justsingle.client.emulation;
 import io.github.aaryadev.justsingle.client.mixin.client.MouseInvoker;
 import io.github.aaryadev.justsingle.client.state.ButtonStateTracker;
 import net.minecraft.client.Mouse;
+import net.minecraft.client.input.MouseInput;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.concurrent.locks.LockSupport;
@@ -22,7 +23,8 @@ public final class DoubleClickEmulator {
         return SYNTHETIC_GUARD.get();
     }
 
-    public void duplicateAsHardwareBounce(Mouse mouse, long window, int button, int mods, long nowNanos, boolean inScreen) {
+    public void duplicateAsHardwareBounce(Mouse mouse, long window, MouseInput input, long nowNanos, boolean inScreen) {
+        int button = input.button();
         long lastNativePressNanos = stateTracker.getLastNativePressNanos(button);
         long lastDuplicateNanos = stateTracker.getLastDuplicateNanos(button);
 
@@ -37,9 +39,9 @@ public final class DoubleClickEmulator {
         SYNTHETIC_GUARD.set(Boolean.TRUE);
         try {
             MouseInvoker invoker = (MouseInvoker) mouse;
-            invoker.justsingle$invokeOnMouseButton(window, button, GLFW.GLFW_RELEASE, mods);
+            invoker.justsingle$invokeOnMouseButton(window, input, GLFW.GLFW_RELEASE);
             LockSupport.parkNanos(timingModel.sampleBounceGapNs());
-            invoker.justsingle$invokeOnMouseButton(window, button, GLFW.GLFW_PRESS, mods);
+            invoker.justsingle$invokeOnMouseButton(window, input, GLFW.GLFW_PRESS);
             stateTracker.markDuplicated(button, nowNanos);
         } finally {
             SYNTHETIC_GUARD.set(Boolean.FALSE);

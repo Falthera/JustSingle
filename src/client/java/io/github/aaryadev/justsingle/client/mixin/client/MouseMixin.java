@@ -3,6 +3,7 @@ package io.github.aaryadev.justsingle.client.mixin.client;
 import io.github.aaryadev.justsingle.client.input.MouseInputInterceptor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
+import net.minecraft.client.input.MouseInput;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -17,7 +18,7 @@ public abstract class MouseMixin {
     private MinecraftClient client;
 
     @Inject(method = "onMouseButton", at = @At("TAIL"))
-    private void justsingle$onMouseButton(long window, int button, int action, int mods, CallbackInfo ci) {
-        MouseInputInterceptor.getInstance().onMouseButton((Mouse) (Object) this, client, window, button, action, mods);
+    private void justsingle$onMouseButton(long window, MouseInput input, int action, CallbackInfo ci) {
+        MouseInputInterceptor.getInstance().onMouseButton((Mouse) (Object) this, client, window, input, action);
     }
 }
