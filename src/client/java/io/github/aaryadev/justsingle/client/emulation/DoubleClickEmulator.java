@@ -25,14 +25,9 @@ public final class DoubleClickEmulator {
 
     public void duplicateAsHardwareBounce(Mouse mouse, long window, MouseInput input, long nowNanos, boolean inScreen) {
         int button = input.button();
-        long lastNativePressNanos = stateTracker.getLastNativePressNanos(button);
         long lastDuplicateNanos = stateTracker.getLastDuplicateNanos(button);
 
-        if (!timingModel.shouldDuplicate(button, nowNanos, lastDuplicateNanos, lastNativePressNanos)) {
-            return;
-        }
-
-        if (!timingModel.isTapLike(stateTracker.getPressStartNanos(button), nowNanos)) {
+        if (!timingModel.shouldDuplicate(button, nowNanos, lastDuplicateNanos, stateTracker.getLastNativePressNanos(button))) {
             return;
         }
 
