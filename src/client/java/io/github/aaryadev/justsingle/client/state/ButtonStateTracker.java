@@ -1,5 +1,7 @@
 package io.github.aaryadev.justsingle.client.state;
 
+import net.minecraft.item.Item;
+
 public final class ButtonStateTracker {
     private static final int MAX_BUTTONS = 8;
 
@@ -7,6 +9,7 @@ public final class ButtonStateTracker {
     private final long[] lastDuplicateNanos = new long[MAX_BUTTONS];
     private final long[] pressStartNanos = new long[MAX_BUTTONS];
     private final boolean[] pressed = new boolean[MAX_BUTTONS];
+    private Item lastRightClickItem;
 
     public void onNativePress(int button, long nowNanos) {
         if (!isTrackedButton(button)) {
@@ -52,6 +55,14 @@ public final class ButtonStateTracker {
         lastDuplicateNanos[button] = nowNanos;
     }
 
+    public Item getLastRightClickItem() {
+        return lastRightClickItem;
+    }
+
+    public void markRightClickItem(Item item) {
+        lastRightClickItem = item;
+    }
+
     public boolean isPressed(int button) {
         return isTrackedButton(button) && pressed[button];
     }
@@ -63,6 +74,7 @@ public final class ButtonStateTracker {
             pressStartNanos[i] = 0L;
             pressed[i] = false;
         }
+        lastRightClickItem = null;
     }
 
     private boolean isTrackedButton(int button) {
