@@ -4,7 +4,6 @@ import io.github.aaryadev.justsingle.client.mixin.client.MouseInvoker;
 import io.github.aaryadev.justsingle.client.state.ButtonStateTracker;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.input.MouseInput;
-import net.minecraft.item.Item;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.concurrent.locks.LockSupport;
@@ -24,27 +23,12 @@ public final class DoubleClickEmulator {
         return SYNTHETIC_GUARD.get();
     }
 
-    public void duplicateAsHardwareBounce(Mouse mouse, long window, MouseInput input, Item heldItem, long nowNanos, boolean inScreen) {
+    public void duplicateAsHardwareBounce(Mouse mouse, long window, MouseInput input, long nowNanos, boolean inScreen) {
         int button = input.button();
         long lastDuplicateNanos = stateTracker.getLastDuplicateNanos(button);
 
-        if (button == 1) {
-            Item lastRightClickItem = stateTracker.getLastRightClickItem();
-            if (lastRightClickItem != null && lastRightClickItem == heldItem) {
-                stateTracker.markRightClickItem(heldItem);
-                return;
-            }
-        }
-
         if (!timingModel.shouldDuplicate(button, nowNanos, lastDuplicateNanos, stateTracker.getLastNativePressNanos(button))) {
-            if (button == 1) {
-                stateTracker.markRightClickItem(heldItem);
-            }
             return;
-        }
-
-        if (button == 1) {
-            stateTracker.markRightClickItem(heldItem);
         }
 
         SYNTHETIC_GUARD.set(Boolean.TRUE);

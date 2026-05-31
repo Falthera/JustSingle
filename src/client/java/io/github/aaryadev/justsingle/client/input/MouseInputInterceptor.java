@@ -6,6 +6,7 @@ import io.github.aaryadev.justsingle.client.state.ButtonStateTracker;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.input.MouseInput;
+import net.minecraft.item.Items;
 import net.minecraft.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
 
@@ -58,9 +59,13 @@ public final class MouseInputInterceptor {
         long nowNanos = System.nanoTime();
         if (action == GLFW.GLFW_PRESS) {
             buttonStateTracker.onNativePress(button, nowNanos);
-            boolean inScreen = client.currentScreen != null;
-            ItemStack heldStack = client.player == null ? ItemStack.EMPTY : client.player.getMainHandStack();
-            emulator.duplicateAsHardwareBounce(mouse, window, input, heldStack.getItem(), nowNanos, inScreen);
+            if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+                ItemStack heldStack = client.player == null ? ItemStack.EMPTY : client.player.getMainHandStack();
+                if (heldStack.isOf(Items.RESPAWN_ANCHOR)) {
+                    boolean inScreen = client.currentScreen != null;
+                    emulator.duplicateAsHardwareBounce(mouse, window, input, nowNanos, inScreen);
+                }
+            }
             return;
         }
 
